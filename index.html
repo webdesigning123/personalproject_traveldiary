@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>A5 Dot-Grid Flipbook (smart corner nudge)</title>
+
+  <link rel="stylesheet" href="styles.css" />
+
+  <!-- jQuery (required by Turn.js) -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js" crossorigin="anonymous"></script>
+  <!-- Turn.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/turn.js/3/turn.min.js" crossorigin="anonymous"></script>
+</head>
+<body>
+  <div class="wrap">
+    <div id="flipbook"><!-- pages injected by app.js --></div>
+
+    <div class="controls">
+      <button id="prev" class="btn">⟵ Prev</button>
+      <span class="hint">Tip: click/tap a bottom corner or use ← →</span>
+      <button id="next" class="btn">Next ⟶</button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

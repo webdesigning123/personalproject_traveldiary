@@ -1,0 +1,186 @@
+:root{
+  /* A5 base size at ~96dpi */
+  --base-page-w: 560;
+  --base-page-h: 794;
+
+  /* Effective sizes (JS updates these) */
+  --page-w: 560px;
+  --page-h: 794px;
+  --book-w: 1120px; /* 2 * page */
+  --book-h: 794px;
+
+  --paper: #ffffff;
+  --line:  #e5eaf5; /* dot color */
+}
+
+html, body { height: 100%; }
+body {
+  margin: 0;
+  background: radial-gradient(1200px 800px at 50% 20%, #eef2f8, #e7ecf6 35%, #eaf0ff 60%, #eef3ff 100%) fixed;
+  font-family: system-ui, -apple-system, "Segoe UI", Inter, Roboto, Arial, sans-serif;
+}
+
+.wrap {
+  min-height: 100%;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+/* No transform scaling: we resize real pixels so Turn.js geometry stays correct */
+#flipbook {
+  width: var(--book-w);
+  height: var(--book-h);
+  filter: drop-shadow(0 12px 30px rgba(10, 20, 60, 0.15));
+}
+
+/* Pages */
+.page {
+  width: var(--page-w);
+  height: var(--page-h);
+  background: white;
+  border-radius: 24px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: none; /* remove local shadow to avoid gradient spill */
+}
+
+/* Add outer shadow via flipbook wrapper */
+#flipbook {
+  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.12));
+}
+
+
+.page::before {
+  /* soft paper sheen */
+  content: "";
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,.95), rgba(247,250,255,.9));
+  pointer-events: none;
+}
+
+/* Dot grid — edge to edge */
+.ruled {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(var(--line) 1px, transparent 1px);
+  background-size: 24px 24px; /* spacing between dots */
+}
+
+/* Corner hints (live inside the page so they move with page curl) */
+.corner-hint {
+  position: absolute;
+  bottom: 0;
+  width: 42px;
+  height: 42px;
+  pointer-events: none;      /* never block flipping */
+  overflow: visible;
+  z-index: 3;
+  opacity: 1;
+  transition: opacity .18s ease; /* smooth show/hide while flipping */
+}
+
+/* Right corner (default) */
+.corner-hint.right { right: 0; }
+.corner-hint.right::before {
+  content: "";
+  position: absolute; right: 0; bottom: 0;
+  width: 100%; height: 100%;
+  clip-path: polygon(100% 0, 0 100%, 100% 100%);
+  background:
+    linear-gradient(135deg, rgba(0,0,0,0.08), rgba(0,0,0,0) 60%),
+    linear-gradient(135deg, #ffffff, #f2f6ff);
+  box-shadow: -3px -3px 6px rgba(0,0,0,0.08);
+  transform-origin: 100% 100%;
+  animation: curl-peek-right 6.5s ease-in-out infinite;
+}
+.corner-hint.right::after {
+  content: "➜";
+  position: absolute; right: 6px; bottom: 6px;
+  font-size: 12px; line-height: 1;
+  color: rgba(0,0,0,0.28);
+  transform: rotate(315deg);
+  animation: nudge-right 6.5s ease-in-out infinite;
+}
+
+/* Left corner */
+.corner-hint.left { left: 0; }
+.corner-hint.left::before {
+  content: "";
+  position: absolute; left: 0; bottom: 0;
+  width: 100%; height: 100%;
+  clip-path: polygon(0 0, 0 100%, 100% 100%);
+  background:
+    linear-gradient(225deg, rgba(0,0,0,0.08), rgba(0,0,0,0) 60%),
+    linear-gradient(225deg, #ffffff, #f2f6ff);
+  box-shadow: 3px -3px 6px rgba(0,0,0,0.08);
+  transform-origin: 0% 100%;
+  animation: curl-peek-left 6.5s ease-in-out infinite;
+}
+.corner-hint.left::after {
+  content: "➜";
+  position: absolute; left: 6px; bottom: 6px;
+  font-size: 12px; line-height: 1;
+  color: rgba(0,0,0,0.28);
+  transform: rotate(225deg);
+  animation: nudge-left 6.5s ease-in-out infinite;
+}
+
+/* Pause/hide helpers controlled by JS */
+.corner-hint.hint-hidden { opacity: 0; }
+.corner-hint.hint-paused::before,
+.corner-hint.hint-paused::after { animation-play-state: paused; }
+
+/* Animations */
+@keyframes curl-peek-right {
+  0%,5%   { transform: rotate(0deg) translate(0,0); opacity:.85; }
+  6%      { transform: rotate(-6deg) translate(-2px,-2px); opacity:1; }
+  10%     { transform: rotate(-10deg) translate(-6px,-6px); opacity:1; }
+  14%     { transform: rotate(-6deg) translate(-2px,-2px); opacity:1; }
+  15%,100%{ transform: rotate(0deg) translate(0,0); opacity:.85; }
+}
+@keyframes nudge-right {
+  0%,5%   { transform: translate(0,0) rotate(315deg); opacity:.35; }
+  6%      { transform: translate(-1px,-1px) rotate(315deg); opacity:.45; }
+  10%     { transform: translate(-3px,-3px) rotate(315deg); opacity:.55; }
+  14%     { transform: translate(-1px,-1px) rotate(315deg); opacity:.45; }
+  15%,100%{ transform: translate(0,0) rotate(315deg); opacity:.35; }
+}
+@keyframes curl-peek-left {
+  0%,5%   { transform: rotate(0deg) translate(0,0); opacity:.85; }
+  6%      { transform: rotate(6deg) translate(2px,-2px); opacity:1; }
+  10%     { transform: rotate(10deg) translate(6px,-6px); opacity:1; }
+  14%     { transform: rotate(6deg) translate(2px,-2px); opacity:1; }
+  15%,100%{ transform: rotate(0deg) translate(0,0); opacity:.85; }
+}
+@keyframes nudge-left {
+  0%,5%   { transform: translate(0,0) rotate(225deg); opacity:.35; }
+  6%      { transform: translate(1px,-1px) rotate(225deg); opacity:.45; }
+  10%     { transform: translate(3px,-3px) rotate(225deg); opacity:.55; }
+  14%     { transform: translate(1px,-1px) rotate(225deg); opacity:.45; }
+  15%,100%{ transform: translate(0,0) rotate(225deg); opacity:.35; }
+}
+
+/* Controls */
+.controls {
+  margin-top: 14px;
+  display: flex; gap: 8px;
+  justify-content: center; align-items: center;
+  color: #415173; font-size: 14px;
+}
+.btn {
+  border: 1px solid #d5dbea; background: #fff; padding: 8px 12px;
+  border-radius: 10px; cursor: pointer;
+  transition: transform .12s ease, box-shadow .12s ease, background .12s ease;
+}
+.btn:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(40,60,120,.12); background: #f9fbff; }
+.hint { opacity: .85; }
+
+/* Print */
+@media print {
+  @page { size: A5 portrait; margin: 12mm; }
+  body { background: #fff; }
+  #flipbook { width: var(--page-w); height: var(--page-h); filter: none; }
+  .page { break-after: page; border: 0; }
+  .controls, .corner-hint { display: none; }
+}
